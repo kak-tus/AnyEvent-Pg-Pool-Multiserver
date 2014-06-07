@@ -11,6 +11,7 @@ use Carp qw( croak );
 use AnyEvent;
 use AnyEvent::Pg::Pool;
 use Future;
+use Params::Validate qw( validate_with );
 
 use fields qw(
   pool
