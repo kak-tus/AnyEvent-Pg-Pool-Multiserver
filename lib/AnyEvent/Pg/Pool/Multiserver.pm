@@ -27,7 +27,7 @@ sub new {
 
   my $pool = [];
 
-  foreach my $server ( $params->{servers} ) {
+  foreach my $server ( @{ $params->{servers} } ) {
     my $dbh = AnyEvent::Pg::Pool->new(
       $server->{conn},
       connection_retries => 10,
