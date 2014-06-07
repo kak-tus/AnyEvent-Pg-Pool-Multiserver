@@ -179,8 +179,8 @@ AnyEvent::Pg::Pool::Multiserver - Asyncronious multiserver requests to Postgresq
 
   # query and args same as in AnyEvent::Pg
   $pool->selectall_arrayref(
-    query  => 'SELECT $1 AS val;',
-    args   => [ 1 ],
+    query  => 'SELECT val FROM ( SELECT 1 AS val ) tmp WHERE tmp.val = $1;',
+    args   => [1],
     cb     => sub {
       my $result = shift;
       my $err    = shift;
@@ -205,7 +205,9 @@ AnyEvent::Pg::Pool::Multiserver - Asyncronious multiserver requests to Postgresq
 
 =head1 DESCRIPTION
 
+=head2 $pool->selectall_arrayref
 
+query and args are the same, that in AnyEvent::Pg
 
 =head1 SOURCE AVAILABILITY
 

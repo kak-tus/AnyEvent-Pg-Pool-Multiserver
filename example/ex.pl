@@ -27,8 +27,8 @@ my $pool = AnyEvent::Pg::Pool::Multiserver->new( servers => $servers );
 my $cv = AE::cv;
 
 $pool->selectall_arrayref(
-  query  => 'SELECT ? AS val;',
-  args   => [ 1 ],
+  query  => 'SELECT val FROM ( SELECT 1 AS val ) tmp WHERE tmp.val = $1;',
+  args   => [1],
   cb     => sub {
     my $result = shift;
     my $err    = shift;
