@@ -84,7 +84,7 @@ sub selectall_arrayref {
 
       if ( !$error && $result  ) {
         if ( $result->nRows ) {
-          foreach my $row ( $res->rowsAsHashes ) {
+          foreach my $row ( $result->rowsAsHashes ) {
             $row->{_server_id} = $server->{id};
             push @$results, $row;
           }
