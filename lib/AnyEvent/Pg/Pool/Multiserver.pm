@@ -20,9 +20,9 @@ sub new {
   my $class  = shift;
   my $params = {@_};
 
-  $params = $self->_validate_new( $params );
-
   my $self = fields::new( $class );
+
+  $params = $self->_validate_new( $params );
 
   my $pool = [];
 
