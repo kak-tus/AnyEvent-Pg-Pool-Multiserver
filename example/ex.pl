@@ -28,7 +28,7 @@ my $cv = AE::cv;
 
 $pool->selectall_arrayref(
   query  => 'SELECT ? AS val;',
-  agrs => [ 1 ],
+  args   => [ 1 ],
   cb     => sub {
     my $result = shift;
     my $err    = shift;
