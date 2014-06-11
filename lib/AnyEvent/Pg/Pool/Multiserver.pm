@@ -68,7 +68,15 @@ sub selectall_arrayref {
 
   my @futures = ();
 
-  foreach my $server_id ( keys @{ $self->{pool} } ) {
+  my @pool = ();
+  if ( defined $params->{server_id} ) ) {
+    push @pool, $params->{server_id};
+  }
+  else {
+    @pool = keys @{ $self->{pool} };
+  }
+
+  foreach my $server_id ( @pool ) {
     my $server = $self->{pool}{$server_id};
     push @futures, $self->_get_future_push_query(
       query  => $params->{query},
@@ -115,9 +123,10 @@ sub _validate_selectall_arrayref {
   $params = validate_with(
     params => $params,
     spec => {
-      query => 1,
-      args  => 0,
-      cb    => 1,
+      query     => 1,
+      args      => 0,
+      cb        => 1,
+      server_id => 0,
     },
   );
 
