@@ -32,6 +32,7 @@ sub new {
       $server->{conn},
       connection_retries => 10,
       connection_delay   => 1,
+      size               => 4,
       on_error           => sub {},
       on_transient_error => sub {},
       on_connect_error   => sub {},
