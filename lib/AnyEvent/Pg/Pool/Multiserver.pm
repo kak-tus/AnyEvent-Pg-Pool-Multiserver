@@ -25,7 +25,7 @@ sub new {
 
   $params = $self->_validate_new( $params );
 
-  my $pool = [];
+  my $pool = {};
 
   foreach my $server ( @{ $params->{servers} } ) {
     my $dbh = AnyEvent::Pg::Pool->new(
@@ -37,7 +37,8 @@ sub new {
       on_connect_error   => sub {},
     );
 
-    push @$pool, { dbh => $dbh, name => $server->{name}, id => $server->{id} };
+    croak 'server_id must be unique' if $pool->{ $server->{id} };
+    $pool->{ $server->{id} } = { dbh => $dbh, name => $server->{name}, id => $server->{id} };
   }
 
   $self->{pool} = $pool;
@@ -67,7 +68,8 @@ sub selectall_arrayref {
 
   my @futures = ();
 
-  foreach my $server ( @{ $self->{pool} } ) {
+  foreach my $server_id ( keys @{ $self->{pool} } ) {
+    my $server = $self->{pool}{$server_id};
     push @futures, $self->_get_future_push_query(
       query  => $params->{query},
       args   => $params->{args},
