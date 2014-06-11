@@ -70,7 +70,7 @@ sub selectall_arrayref {
   my @futures = ();
 
   my @pool = ();
-  if ( defined $params->{server_id} ) ) {
+  if ( defined $params->{server_id} ) {
     push @pool, $params->{server_id};
   }
   else {
