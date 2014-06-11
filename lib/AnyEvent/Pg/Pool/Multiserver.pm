@@ -74,7 +74,7 @@ sub selectall_arrayref {
     push @pool, $params->{server_id};
   }
   else {
-    @pool = keys @{ $self->{pool} };
+    @pool = keys %{ $self->{pool} };
   }
 
   foreach my $server_id ( @pool ) {
