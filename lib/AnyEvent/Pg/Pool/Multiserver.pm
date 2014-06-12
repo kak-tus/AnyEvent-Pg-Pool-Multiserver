@@ -95,12 +95,7 @@ sub selectall_arrayref {
       my ( $server, $result, $error ) = $future->get();
 
       if ( !$error && $result  ) {
-        if ( $result->nRows ) {
-          foreach my $row ( $result->rowsAsHashes ) {
-            $row->{_server_id} = $server->{id};
-            push @$results, $row;
-          }
-        }
+        push @$results, @$result;
       }
       else {
         push @$errors, {
@@ -154,7 +149,16 @@ sub _get_future_push_query {
       my $w   = shift;
       my $res = shift;
 
-      $future->done( $params->{server}, $res );
+      my $result = [];
+
+      if ( $res->nRows ) {
+        foreach my $row ( $res->rowsAsHashes ) {
+          $row->{_server_id} = $params->{server}{id};
+          push @$result, $row;
+        }
+      }
+
+      $future->done( $params->{server}, $result );
       undef $watcher;
     },
   );
