@@ -80,9 +80,10 @@ sub selectall_arrayref {
   foreach my $server_id ( @pool ) {
     my $server = $self->{pool}{$server_id};
     push @futures, $self->_get_future_push_query(
-      query  => $params->{query},
-      args   => $params->{args},
-      server => $server,
+      query     => $params->{query},
+      args      => $params->{args},
+      server    => $server,
+      cb_server => $params->{cb_server},
     );
   }
 
@@ -123,6 +124,7 @@ sub _validate_selectall_arrayref {
       args      => 0,
       cb        => 1,
       server_id => 0,
+      cb_server => 0,
     },
   );
 
@@ -158,8 +160,17 @@ sub _get_future_push_query {
         }
       }
 
-      $future->done( $params->{server}, $result );
-      undef $watcher;
+      my $cb = sub {
+        $future->done( $params->{server}, $result );
+        undef $watcher;
+      };
+
+      if ( $params->{cb_server} ) {
+        $params->{cb_server}->( result => $result, cb => $cb );
+      }
+      else {
+        $cb->();
+      }
     },
   );
 
