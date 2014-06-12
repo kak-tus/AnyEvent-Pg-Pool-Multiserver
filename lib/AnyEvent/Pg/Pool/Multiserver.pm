@@ -84,6 +84,7 @@ sub selectall_arrayref {
       args      => $params->{args},
       server    => $server,
       cb_server => $params->{cb_server},
+      type      => 'selectall_arrayref_slice',
     );
   }
 
@@ -95,7 +96,7 @@ sub selectall_arrayref {
     foreach my $future ( @futures ) {
       my ( $server, $result, $error ) = $future->get();
 
-      if ( !$error && $result  ) {
+      if ( !$error ) {
         push @$results, @$result;
       }
       else {
@@ -139,7 +140,7 @@ sub _get_future_push_query {
 
   my $watcher;
 
-  $watcher = $params->{server}->{dbh}->push_query(
+  $watcher = $params->{server}{dbh}->push_query(
     query => $params->{query},
     args  => $params->{args},
     on_error => sub {
@@ -151,13 +152,13 @@ sub _get_future_push_query {
       my $w   = shift;
       my $res = shift;
 
-      my $result = [];
+      my $result;
 
-      if ( $res->nRows ) {
-        foreach my $row ( $res->rowsAsHashes ) {
-          $row->{_server_id} = $params->{server}{id};
-          push @$result, $row;
-        }
+      if ( $params->{type} eq 'selectall_arrayref_slice' ) {
+        $result = _fetchall_arrayref_slice( $params->{server}{id}, $res );
+      }
+      elsif ( $params->{type} eq 'selectrow_hashref' ) {
+        $result = _fetchrow_hashref( $params->{server}{id}, $res );
       }
 
       my $cb = sub {
@@ -175,6 +176,87 @@ sub _get_future_push_query {
   );
 
   return $future;
+}
+
+sub _fetchall_arrayref_slice {
+  my $id  = shift;
+  my $res = shift;
+
+  my $result = [];
+
+  if ( $res->nRows ) {
+    foreach my $row ( $res->rowsAsHashes ) {
+      $row->{_server_id} = $id;
+      push @$result, $row;
+    }
+  }
+
+  return $result;
+}
+
+sub _fetchrow_hashref {
+  my $id  = shift;
+  my $res = shift;
+
+  my $result;
+
+  if ( $res->nRows ) {
+    $result = $res->rowAsHash(0);
+    $result->{_server_id} = $id;
+  }
+
+  return $result;
+}
+
+sub selectrow_hashref {
+  my __PACKAGE__ $self = shift;
+  my $params = {@_};
+
+  $params = $self->_validate_selectrow_hashref( $params );
+
+  my $future = $self->_get_future_push_query(
+    query     => $params->{query},
+    args      => $params->{args},
+    server    => $self->{pool}{ $params->{server_id} },
+    cb_server => $params->{cb_server},
+    type      => 'selectrow_hashref',
+  );
+
+  $future->on_done( sub {
+    my ( $server, $result, $error ) = $future->get();
+
+    if ( !$error ) {
+      $params->{cb}->( $result );
+    }
+    else {
+      $params->{cb}->( undef, {
+        name => $server->{name},
+        id   => $server->{id},
+      } );
+    }
+
+    undef $future;
+  } );
+
+  return;
+}
+
+sub _validate_selectrow_hashref {
+  my __PACKAGE__ $self = shift;
+  my $params = shift;
+
+  $params = validate_with(
+    params => $params,
+    spec => {
+      query     => 1,
+      args      => 0,
+      cb        => 1,
+      server_id => 1,
+      cb_server => 0,
+    },
+  );
+
+  return $params;
 }
 
 1;
