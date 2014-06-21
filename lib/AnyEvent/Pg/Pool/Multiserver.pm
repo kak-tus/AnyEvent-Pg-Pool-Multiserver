@@ -218,7 +218,7 @@ sub _fetchrow_array {
   my $result;
 
   if ( $res->nRows ) {
-    $result = [ $id, $res->value( 0, 0 ) ];
+    $result = [ $id, $res->row(0) ];
   }
 
   return $result;
