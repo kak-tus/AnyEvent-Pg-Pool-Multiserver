@@ -163,6 +163,9 @@ sub _get_future_push_query {
       elsif ( $params->{type} eq 'selectrow_array' ) {
         $result = _fetchrow_array( $params->{server}{id}, $res );
       }
+      elsif ( $params->{type} eq 'do' ) {
+        $result = _fetch_do( $params->{server}{id}, $res );
+      }
 
       my $cb = sub {
         $future->done( $params->{server}, $result );
@@ -222,6 +225,15 @@ sub _fetchrow_array {
   }
 
   return $result;
+}
+
+sub _fetch_do {
+  my $id  = shift;
+  my $res = shift;
+
+  # TODO return real result
+
+  return 1;
 }
 
 sub selectrow_hashref {
@@ -309,6 +321,57 @@ sub selectrow_array {
 }
 
 sub _validate_selectrow_array {
+  my __PACKAGE__ $self = shift;
+  my $params = shift;
+
+  $params = validate_with(
+    params => $params,
+    spec => {
+      query     => 1,
+      args      => 0,
+      cb        => 1,
+      server_id => 1,
+      cb_server => 0,
+    },
+  );
+
+  return $params;
+}
+
+sub do {
+  my __PACKAGE__ $self = shift;
+  my $params = {@_};
+
+  $params = $self->_validate_do( $params );
+
+  my $future = $self->_get_future_push_query(
+    query     => $params->{query},
+    args      => $params->{args},
+    server    => $self->{pool}{ $params->{server_id} },
+    cb_server => $params->{cb_server},
+    type      => 'do',
+  );
+
+  $future->on_done( sub {
+    my ( $server, $result, $error ) = $future->get();
+
+    if ( !$error ) {
+      $params->{cb}->( $result );
+    }
+    else {
+      $params->{cb}->( undef, {
+        name => $server->{name},
+        id   => $server->{id},
+      } );
+    }
+
+    undef $future;
+  } );
+
+  return;
+}
+
+sub _validate_do {
   my __PACKAGE__ $self = shift;
   my $params = shift;
 
