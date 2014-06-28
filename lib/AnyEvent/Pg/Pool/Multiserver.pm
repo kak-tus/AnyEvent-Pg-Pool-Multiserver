@@ -15,6 +15,7 @@ use Params::Validate qw( validate_with );
 
 use fields qw(
   pool
+  local
 );
 
 sub new {
@@ -43,6 +44,7 @@ sub new {
   }
 
   $self->{pool} = $pool;
+  $self->{local} = $params->{local};
 
   return $self;
 }
@@ -55,6 +57,7 @@ sub _validate_new {
     params => $params,
     spec => {
       servers => 1,
+      local   => 1,
     },
   );
 
