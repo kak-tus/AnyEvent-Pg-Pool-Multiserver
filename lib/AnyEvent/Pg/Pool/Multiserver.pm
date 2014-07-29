@@ -7,7 +7,7 @@ use warnings;
 use utf8;
 use v5.10;
 
-use Carp qw( croak );
+use Carp qw( croak carp );
 use AnyEvent;
 use AnyEvent::Pg::Pool;
 use Future;
@@ -34,9 +34,9 @@ sub new {
       connection_retries => 10,
       connection_delay   => 1,
       size               => 4,
-      on_error           => sub {},
-      on_transient_error => sub {},
-      on_connect_error   => sub {},
+      on_error           => sub { carp 'Some error'; },
+      on_transient_error => sub { carp 'Transient error'; },
+      on_connect_error   => sub { carp 'Connection error'; },
     );
 
     croak 'server_id must be unique' if $pool->{ $server->{id} };
@@ -147,6 +147,7 @@ sub _get_future_push_query {
     query => $params->{query},
     args  => $params->{args},
     on_error => sub {
+      carp shift;
       $future->done( $params->{server}, undef, 1 );
       undef $watcher;
     },
@@ -154,6 +155,13 @@ sub _get_future_push_query {
       my $p   = shift;
       my $w   = shift;
       my $res = shift;
+
+      if ( $res->errorMessage ) {
+        carp $res->errorMessage;
+        $future->done( $params->{server}, undef, 1 );
+        undef $watcher;
+        return;
+      }
 
       my $result;
 
