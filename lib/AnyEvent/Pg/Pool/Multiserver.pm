@@ -435,7 +435,7 @@ AnyEvent::Pg::Pool::Multiserver - Asyncronious multiserver requests to Postgresq
       conn => 'host=remote2 port=5432 dbname=mydb user=myuser password=mypass',
     },
   ];
-  my $pool = AnyEvent::Pg::Pool::Multiserver->new( servers => $servers );
+  my $pool = AnyEvent::Pg::Pool::Multiserver->new( servers => $servers, local => 1 );
 
   # multi-server request
 
@@ -592,7 +592,7 @@ Optional: args, cb_server
 
 =head1 SOURCE AVAILABILITY
 
-The source code for this module is available from Github
+The source code for this module is available
 at L<Github|https://github.com/kak-tus/AnyEvent-Pg-Pool-Multiserver>
 
 =head1 AUTHOR
