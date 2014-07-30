@@ -18,6 +18,12 @@ use fields qw(
   local
 );
 
+use Class::XSAccessor {
+  getters => {
+    local => 'local'
+  },
+};
+
 sub new {
   my $class  = shift;
   my $params = {@_};
@@ -543,6 +549,15 @@ AnyEvent::Pg::Pool::Multiserver - Asyncronious multiserver requests to Postgresq
         say "server_id=$result->[ 0 ] updated=$result->[ 1 ]";
       }
     },
+  );
+
+  # local-server request to do something
+
+  $pool->do(
+    query     => 'UPDATE table SET column = 1 WHERE id = $1;',
+    args      => [ 1 ],
+    server_id => $pool->local(),
+    cb        => sub { ... },
   );
 
 =head1 DESCRIPTION

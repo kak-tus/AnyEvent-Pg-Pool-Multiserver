@@ -22,7 +22,7 @@ my $servers = [
     conn => 'host=remote2 port=5432 dbname=mydb user=myuser password=mypass',
   },
 ];
-my $pool = AnyEvent::Pg::Pool::Multiserver->new( servers => $servers );
+my $pool = AnyEvent::Pg::Pool::Multiserver->new( servers => $servers, local => 1 );
 
 my $cv;
 
@@ -186,6 +186,32 @@ $pool->do(
   query     => 'UPDATE table SET column = 1 WHERE id = $1;',
   args      => [ 1 ],
   server_id => 1,
+  cb        => sub {
+    my $result = shift;
+    my $error  = shift;
+
+    if ( $error ) {
+      say "err $error->{error} with $error->{server_name} $error->{server_id}";
+    }
+
+    if ( $result ) {
+      say "server_id=$result->[ 0 ] updated=$result->[ 1 ]";
+    }
+
+    $cv->send;
+  },
+);
+
+$cv->recv;
+
+$cv->recv;
+
+# local-server request to do something
+
+$pool->do(
+  query     => 'UPDATE table SET column = 1 WHERE id = $1;',
+  args      => [ 1 ],
+  server_id => $pool->local(),
   cb        => sub {
     my $result = shift;
     my $error  = shift;

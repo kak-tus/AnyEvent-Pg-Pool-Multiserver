@@ -12,6 +12,7 @@ WriteMakefile(
     'Future'             => '0.27',
     'AnyEvent::Pg::Pool' => '0.14',
     'Params::Validate'   => '1.10',
+    'Class::XSAccessor'  => '1.19',
   },
   ABSTRACT_FROM  => 'lib/AnyEvent/Pg/Pool/Multiserver.pm',
   AUTHOR         => 'Andrey Kuzmin <kak-tus@mail.ru>'
