@@ -1,6 +1,6 @@
 package AnyEvent::Pg::Pool::Multiserver;
 
-our $VERSION = '0.2';
+our $VERSION = '0.3';
 
 use strict;
 use warnings;
@@ -254,9 +254,13 @@ sub _fetch_do {
   my $id  = shift;
   my $res = shift;
 
-  # TODO return real result
+  my $result;
 
-  return [ $id, 1 ];
+  if ( $res->nRows ) {
+    $result = [ $id, $res->row( 0 ) ];
+  }
+
+  return $result;
 }
 
 sub selectrow_hashref {
