@@ -1,6 +1,6 @@
 package AnyEvent::Pg::Pool::Multiserver;
 
-our $VERSION = '0.3';
+our $VERSION = '0.4';
 
 use strict;
 use warnings;
@@ -256,8 +256,8 @@ sub _fetch_do {
 
   my $result;
 
-  if ( $res->nRows ) {
-    $result = [ $id, $res->row( 0 ) ];
+  if ( $res->cmdRows ) {
+    $result = [ $id, $res->cmdRows ];
   }
 
   return $result;
